@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 # -*-coding:utf-8 -*
 
+import os
+import sys
+import datetime
+import gzip
+
 from python_opensubtitles.pythonopensubtitles.opensubtitles import OpenSubtitles
 from python_opensubtitles.pythonopensubtitles.utils import File
-import sys
-import os
 from urllib import request
-import io
-import gzip
 
 valid_extensions = [".avi", ".mkv", ".mpeg", ".mpg", ".mp4"]
 subtitles_extension = ".srt"
@@ -55,7 +56,6 @@ if len(sys.argv) != 2 or not os.path.isdir(sys.argv[1]):
 else:
     path = sys.argv[1]
     valid_files_in_directory = list_valid_files_in_directory(path)
-    print("\n" . join(valid_files_in_directory))
     open_sub = OpenSubtitles()
     token = open_sub.login('login', 'password')
     for video_to_get_sub in valid_files_in_directory:
@@ -66,6 +66,7 @@ else:
         try:
             subtitles_file = data[0]["SubDownloadLink"]
             download_and_unzip_file(subtitles_file, video_to_get_sub)
+            print(datetime.datetime.now().isoformat(), " --- subtitle found for ", video_to_get_sub)
         except:
-            print("no subtitles found for ", video_to_get_sub, file=sys.stderr)
+            print(datetime.datetime.now().isoformat(), " --- /!\ no subtitles found for ", video_to_get_sub, file=sys.stderr)
 
