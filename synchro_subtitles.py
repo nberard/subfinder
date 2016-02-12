@@ -5,6 +5,7 @@ import os
 import sys
 import datetime
 import gzip
+import pickle
 
 from python_opensubtitles.pythonopensubtitles.opensubtitles import OpenSubtitles
 from python_opensubtitles.pythonopensubtitles.utils import File
@@ -12,6 +13,22 @@ from urllib import request
 
 valid_extensions = [".avi", ".mkv", ".mpeg", ".mpg", ".mp4"]
 subtitles_extension = ".srt"
+exclude_list_filename = "data/exclude.lst"
+
+
+def save_exclude_list(exclude_list):
+    with open(exclude_list_filename, 'wb') as fichier:
+        depickler = pickle.Pickler(fichier)
+        depickler.dump(exclude_list)
+
+
+def get_exclude_list():
+    exclude_list = []
+    if os.path.exists(exclude_list_filename):
+        with open(exclude_list_filename, 'rb') as fichier:
+            depickler = pickle.Unpickler(fichier)
+            exclude_list = depickler.load()
+    return exclude_list
 
 
 def subtitle_exists(path, file, extension):
@@ -56,9 +73,12 @@ if len(sys.argv) != 2 or not os.path.isdir(sys.argv[1]):
 else:
     path = sys.argv[1]
     valid_files_in_directory = list_valid_files_in_directory(path)
+    exclude_list = get_exclude_list()
     open_sub = OpenSubtitles()
     token = open_sub.login('login', 'password')
     for video_to_get_sub in valid_files_in_directory:
+        if video_to_get_sub in exclude_list:
+            continue
         sub_file = File(video_to_get_sub)
         data = open_sub.search_subtitles([
             {'sublanguageid': 'eng', 'moviehash': sub_file.get_hash(), 'moviebytesize': sub_file.size}
@@ -69,4 +89,6 @@ else:
             print(datetime.datetime.now().isoformat(), " --- subtitle found for ", video_to_get_sub)
         except:
             print(datetime.datetime.now().isoformat(), " --- /!\ no subtitles found for ", video_to_get_sub, file=sys.stderr)
+            exclude_list.append(video_to_get_sub)
 
+    save_exclude_list(exclude_list)
