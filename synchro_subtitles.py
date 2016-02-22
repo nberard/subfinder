@@ -11,7 +11,7 @@ from python_opensubtitles.pythonopensubtitles.opensubtitles import OpenSubtitles
 from python_opensubtitles.pythonopensubtitles.utils import File
 from urllib import request
 
-valid_extensions = [".avi", ".mkv", ".mpeg", ".mpg", ".mp4"]
+valid_extensions = [".avi", ".mkv", ".mpeg", ".mpg", ".mp4", ".m4v"]
 subtitles_extension = ".srt"
 exclude_list_filename = "data/exclude.lst"
 
