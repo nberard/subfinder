@@ -1,0 +1,3 @@
+open_subtitles:
+    login: "your_login_here"
+    password: "your_password_here"

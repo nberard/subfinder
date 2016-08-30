@@ -6,6 +6,7 @@ import sys
 import datetime
 import gzip
 import pickle
+import yaml
 
 from python_opensubtitles.pythonopensubtitles.opensubtitles import OpenSubtitles
 from python_opensubtitles.pythonopensubtitles.utils import File
@@ -68,27 +69,39 @@ def download_and_unzip_file(subtitles_url, video_to_get_sub):
             outfile.write(gz_file_handler.read())
     os.remove(gz_file)
 
-if len(sys.argv) != 2 or not os.path.isdir(sys.argv[1]):
-    print("Usage: ./synchro_subtitles.py <validDirectory>")
-else:
-    path = sys.argv[1]
-    valid_files_in_directory = list_valid_files_in_directory(path)
-    exclude_list = get_exclude_list()
-    open_sub = OpenSubtitles()
-    token = open_sub.login('login', 'password')
-    for video_to_get_sub in valid_files_in_directory:
-        if video_to_get_sub in exclude_list:
-            continue
-        sub_file = File(video_to_get_sub)
-        data = open_sub.search_subtitles([
-            {'sublanguageid': 'eng', 'moviehash': sub_file.get_hash(), 'moviebytesize': sub_file.size}
-        ])
-        try:
-            subtitles_file = data[0]["SubDownloadLink"]
-            download_and_unzip_file(subtitles_file, video_to_get_sub)
-            print(datetime.datetime.now().isoformat(), " --- subtitle found for ", video_to_get_sub)
-        except:
-            print(datetime.datetime.now().isoformat(), " --- /!\ no subtitles found for ", video_to_get_sub, file=sys.stderr)
-            exclude_list.append(video_to_get_sub)
+if not os.path.exists("config.yml"):
+    print("Please create config.yml file by copying config.yml.dist and adapt it to your needs", file=sys.stderr)
+    exit(1)
 
-    save_exclude_list(exclude_list)
+if len(sys.argv) != 2 or not os.path.isdir(sys.argv[1]):
+    print("Usage: ./synchro_subtitles.py <validDirectory>", file=sys.stderr)
+    exit(2)
+
+base_dir = os.path.dirname(__file__)
+config = yaml.safe_load(open(os.path.join(base_dir, "config.yml")))
+subtitles_config = config['open_subtitles']
+path = sys.argv[1]
+valid_files_in_directory = list_valid_files_in_directory(path)
+exclude_list = get_exclude_list()
+open_sub = OpenSubtitles()
+token = open_sub.login(subtitles_config['login'], subtitles_config['password'])
+if token is None:
+    print("Invalid open subtitles credentials (see config.yml)", file=sys.stderr)
+    exit(3)
+
+for video_to_get_sub in valid_files_in_directory:
+    if video_to_get_sub in exclude_list:
+        continue
+    sub_file = File(video_to_get_sub)
+    data = open_sub.search_subtitles([
+        {'sublanguageid': 'eng', 'moviehash': sub_file.get_hash(), 'moviebytesize': sub_file.size}
+    ])
+    try:
+        subtitles_file = data[0]["SubDownloadLink"]
+        download_and_unzip_file(subtitles_file, video_to_get_sub)
+        print(datetime.datetime.now().isoformat(), " --- subtitle found for ", video_to_get_sub)
+    except:
+        print(datetime.datetime.now().isoformat(), " --- /!\ no subtitles found for ", video_to_get_sub, file=sys.stderr)
+        exclude_list.append(video_to_get_sub)
+
+save_exclude_list(exclude_list)
