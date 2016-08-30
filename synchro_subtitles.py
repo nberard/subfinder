@@ -38,7 +38,7 @@ def subtitle_exists(path, file, extension):
 
 def is_valid_file(path, file):
     for valid_extension in valid_extensions:
-        if valid_extension in file:
+        if file.endswith(valid_extension):
             return not subtitle_exists(path, file, valid_extension)
     return False
 
