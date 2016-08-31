@@ -15,6 +15,7 @@ from urllib import request
 valid_extensions = [".avi", ".mkv", ".mpeg", ".mpg", ".mp4", ".m4v"]
 subtitles_extension = ".srt"
 exclude_list_filename = "data/exclude.lst"
+base_dir = os.path.dirname(__file__)
 
 
 def save_exclude_list(exclude_list):
@@ -59,7 +60,7 @@ def list_valid_files_in_directory(path):
 def download_and_unzip_file(subtitles_url, video_to_get_sub):
     filename = os.path.basename(video_to_get_sub)
     dirname = os.path.dirname(video_to_get_sub)
-    subtitles_filename = filename[:-3] + "srt"
+    subtitles_filename = filename[:-4] + subtitles_extension
     gz_file = subtitles_filename + ".gz"
     handle = request.urlopen(subtitles_url).read()
     with open(gz_file, 'wb') as outfile:
@@ -77,9 +78,13 @@ if len(sys.argv) != 2 or not os.path.isdir(sys.argv[1]):
     print("Usage: ./synchro_subtitles.py <validDirectory>", file=sys.stderr)
     exit(2)
 
-base_dir = os.path.dirname(__file__)
 config = yaml.safe_load(open(os.path.join(base_dir, "config.yml")))
 subtitles_config = config['open_subtitles']
+
+if not ("language" in subtitles_config and "login" in subtitles_config and "password" in subtitles_config):
+    print("Invalid configuration (see config.yml.dist for example)", file=sys.stderr)
+    exit(3)
+
 path = sys.argv[1]
 valid_files_in_directory = list_valid_files_in_directory(path)
 exclude_list = get_exclude_list()
@@ -87,14 +92,14 @@ open_sub = OpenSubtitles()
 token = open_sub.login(subtitles_config['login'], subtitles_config['password'])
 if token is None:
     print("Invalid open subtitles credentials (see config.yml)", file=sys.stderr)
-    exit(3)
+    exit(4)
 
 for video_to_get_sub in valid_files_in_directory:
     if video_to_get_sub in exclude_list:
         continue
     sub_file = File(video_to_get_sub)
     data = open_sub.search_subtitles([
-        {'sublanguageid': 'eng', 'moviehash': sub_file.get_hash(), 'moviebytesize': sub_file.size}
+        {'sublanguageid': subtitles_config['language'], 'moviehash': sub_file.get_hash(), 'moviebytesize': sub_file.size}
     ])
     try:
         subtitles_file = data[0]["SubDownloadLink"]
