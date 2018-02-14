@@ -85,6 +85,9 @@ if not ("language" in subtitles_config and "login" in subtitles_config and "pass
     print("Invalid configuration (see config.yml.dist for example)", file=sys.stderr)
     exit(3)
 
+if "user_agent" in subtitles_config:
+    os.environ["OS_USER_AGENT"] = subtitles_config['user_agent']
+
 path = sys.argv[1]
 valid_files_in_directory = list_valid_files_in_directory(path)
 exclude_list = get_exclude_list()
