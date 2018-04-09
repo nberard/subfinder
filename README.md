@@ -5,13 +5,12 @@ It uses a config file (_config.py_) to determine the language to search, and the
 
 ## Requirements
 
-Python 3 and Pip
+Python 3
 
 ## Install
 
 ```
 git clone git@github.com:nberard/subfinder.git 
-pip3 install -r requirements.txt
 git submodule update --init
 cp config.py.dist config.py
 ```
@@ -22,6 +21,16 @@ Change _config.py_ with your open subtitles credentials, adapt it to your needs 
 ./synchro_subtitles.py <pathToValidDirectory>
 ```
 
+## Docker 
+
+```
+cp .env.dist .env 
+```
+and change it to your needs
+```
+docker build -t subfinder .
+docker run --name subfinder -d --env-file=.env -v [your_directory_to_scan]:/data subfinder
+```
 ### Reset exclude list
 
 If the script cannot find the substitles, it will add the video file to an exclude list.
