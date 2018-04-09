@@ -6,7 +6,7 @@ import sys
 import datetime
 import gzip
 import pickle
-import yaml
+import config
 
 from python_opensubtitles.pythonopensubtitles.opensubtitles import OpenSubtitles
 from python_opensubtitles.pythonopensubtitles.utils import File
@@ -70,19 +70,18 @@ def download_and_unzip_file(subtitles_url, video_to_get_sub):
             outfile.write(gz_file_handler.read())
     os.remove(gz_file)
 
-if not os.path.exists("config.yml"):
-    print("Please create config.yml file by copying config.yml.dist and adapt it to your needs", file=sys.stderr)
+if not os.path.exists("config.py"):
+    print("Please create config.py file by copying config.py.dist and adapt it to your needs", file=sys.stderr)
     exit(1)
 
 if len(sys.argv) != 2 or not os.path.isdir(sys.argv[1]):
     print("Usage: ./synchro_subtitles.py <validDirectory>", file=sys.stderr)
     exit(2)
 
-config = yaml.safe_load(open(os.path.join(base_dir, "config.yml")))
-subtitles_config = config['open_subtitles']
+subtitles_config = config.open_subtitles
 
 if not ("language" in subtitles_config and "login" in subtitles_config and "password" in subtitles_config):
-    print("Invalid configuration (see config.yml.dist for example)", file=sys.stderr)
+    print("Invalid configuration (see config.py.dist for example)", file=sys.stderr)
     exit(3)
 
 if "user_agent" in subtitles_config:
@@ -94,7 +93,7 @@ exclude_list = get_exclude_list()
 open_sub = OpenSubtitles()
 token = open_sub.login(subtitles_config['login'], subtitles_config['password'])
 if token is None:
-    print("Invalid open subtitles credentials (see config.yml)", file=sys.stderr)
+    print("Invalid open subtitles credentials (see config.py)", file=sys.stderr)
     exit(4)
 
 for video_to_get_sub in valid_files_in_directory:

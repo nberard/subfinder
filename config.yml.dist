@@ -1,5 +1,0 @@
-open_subtitles:
-    login: "your_login_here"
-    password: "your_password_here"
-    language: "eng" #see "ISO 639-2 Code" column in http://www.loc.gov/standards/iso639-2/php/code_list.php
-    user_agent: "your_user_agent" #see http://trac.opensubtitles.org/projects/opensubtitles/wiki/DevReadFirst
