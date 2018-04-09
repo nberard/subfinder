@@ -1,7 +1,7 @@
 # Subfinder
 
 This script scans a directory and download the subtitles for each movie found using open subtitles API.
-It uses a config file (_config.yml_) to determine the language to search, and the open subtitles credentials to use to connect the API.
+It uses a config file (_config.py_) to determine the language to search, and the open subtitles credentials to use to connect the API.
 
 ## Requirements
 
@@ -11,12 +11,12 @@ Python 3 and Pip
 
 ```
 git clone git@github.com:nberard/subfinder.git 
-pip3 install -r requirements
+pip3 install -r requirements.txt
 git submodule update --init
-cp config.yml.dist config.yml
+cp config.py.dist config.py
 ```
 
-Change _config.yml_ with your open subtitles credentials, adapt it to your needs and run
+Change _config.py_ with your open subtitles credentials, adapt it to your needs and run
 
 ```
 ./synchro_subtitles.py <pathToValidDirectory>
