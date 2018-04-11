@@ -28,7 +28,7 @@ cp .env.dist .env
 ```
 and change it to your needs
 ```
-docker build -t subfinder .
+docker build -t subfinder [--build-arg uid=<the_uid_to_use_for_files_creation>] . 
 docker run --name subfinder -d --env-file=.env -v [your_directory_to_scan]:/data subfinder
 ```
 ### Reset exclude list
