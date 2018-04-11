@@ -11,7 +11,6 @@ import config
 from python_opensubtitles.pythonopensubtitles.opensubtitles import OpenSubtitles
 from python_opensubtitles.pythonopensubtitles.utils import File
 from urllib import request
-
 valid_extensions = [".avi", ".mkv", ".mpeg", ".mpg", ".mp4", ".m4v"]
 subtitles_extension = ".srt"
 exclude_list_filename = "data/exclude.lst"
@@ -74,8 +73,8 @@ if not os.path.exists("config.py"):
     print("Please create config.py file by copying config.py.dist and adapt it to your needs", file=sys.stderr)
     exit(1)
 
-if len(sys.argv) != 2 or not os.path.isdir(sys.argv[1]):
-    print("Usage: ./synchro_subtitles.py <validDirectory>", file=sys.stderr)
+if len(sys.argv) != 2 or (not os.path.isdir(sys.argv[1]) and not os.path.isfile(sys.argv[1])):
+    print("Usage: ./synchro_subtitles.py <validDirectoryOrFile>", file=sys.stderr)
     exit(2)
 
 subtitles_config = config.open_subtitles
@@ -88,7 +87,7 @@ if "user_agent" in subtitles_config:
     os.environ["OS_USER_AGENT"] = subtitles_config['user_agent']
 
 path = sys.argv[1]
-valid_files_in_directory = list_valid_files_in_directory(path)
+valid_files_in_directory = list_valid_files_in_directory(path) if os.path.isdir(path) else [path]
 exclude_list = get_exclude_list()
 open_sub = OpenSubtitles()
 token = open_sub.login(subtitles_config['login'], subtitles_config['password'])
