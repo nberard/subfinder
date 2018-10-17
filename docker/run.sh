@@ -11,7 +11,7 @@ cat $CRONTAB_PATH
 
 touch /var/log/cron.log
 touch /var/log/synchro_subtitles.log
-chown subfinder:subfinder /var/log/cron.log /var/log/synchro_subtitles.log
+chown subfinder:subfinder /var/log/synchro_subtitles.log
 crontab -u subfinder $CRONTAB_PATH
-crond -f &
+crond -L /var/log/cron.log
 tail -f /var/log/cron.log /var/log/synchro_subtitles.log
