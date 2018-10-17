@@ -89,25 +89,25 @@ if "user_agent" in subtitles_config:
 path = sys.argv[1]
 valid_files_in_directory = list_valid_files_in_directory(path) if os.path.isdir(path) else [path]
 exclude_list = get_exclude_list()
-open_sub = OpenSubtitles()
-token = open_sub.login(subtitles_config['login'], subtitles_config['password'])
-if token is None:
-    print("Invalid open subtitles credentials (see config.py)", file=sys.stderr)
-    exit(4)
+files_not_excluded = [file for file in valid_files_in_directory if file not in exclude_list]
 
-for video_to_get_sub in valid_files_in_directory:
-    if video_to_get_sub in exclude_list:
-        continue
-    sub_file = File(video_to_get_sub)
-    data = open_sub.search_subtitles([
-        {'sublanguageid': subtitles_config['language'], 'moviehash': sub_file.get_hash(), 'moviebytesize': sub_file.size}
-    ])
-    try:
-        subtitles_file = data[0]["SubDownloadLink"]
-        download_and_unzip_file(subtitles_file, video_to_get_sub)
-        print(datetime.datetime.now().isoformat(), " --- subtitle found for ", video_to_get_sub)
-    except:
-        print(datetime.datetime.now().isoformat(), " --- /!\ no subtitles found for ", video_to_get_sub, file=sys.stderr)
-        exclude_list.append(video_to_get_sub)
+if files_not_excluded:
+    open_sub = OpenSubtitles()
+    token = open_sub.login(subtitles_config['login'], subtitles_config['password'])
+    if token is None:
+        print("Invalid open subtitles credentials (see config.py)", file=sys.stderr)
+        exit(4)
+    for video_to_get_sub in files_not_excluded:
+        sub_file = File(video_to_get_sub)
+        data = open_sub.search_subtitles([
+            {'sublanguageid': subtitles_config['language'], 'moviehash': sub_file.get_hash(), 'moviebytesize': sub_file.size}
+        ])
+        try:
+            subtitles_file = data[0]["SubDownloadLink"]
+            download_and_unzip_file(subtitles_file, video_to_get_sub)
+            print(datetime.datetime.now().isoformat(), " --- subtitle found for ", video_to_get_sub)
+        except:
+            print(datetime.datetime.now().isoformat(), " --- /!\ no subtitles found for ", video_to_get_sub, file=sys.stderr)
+            exclude_list.append(video_to_get_sub)
 
-save_exclude_list(exclude_list)
+    save_exclude_list(exclude_list)
