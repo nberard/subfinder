@@ -7,6 +7,7 @@ import os
 import pickle
 import sys
 from http.client import ResponseNotReady
+from time import sleep
 from urllib import request
 from xmlrpc.client import ProtocolError
 
@@ -75,6 +76,7 @@ def download_and_unzip_file(subtitles_url, video_to_get_sub):
 
 def call_and_retry(function, *args):
     max_retries = 5
+    sleep_time = 3
     retries = 0
     result = None
     while not result and retries < max_retries:
@@ -82,10 +84,11 @@ def call_and_retry(function, *args):
             result = function(*args)
             break
         except (ProtocolError, ResponseNotReady) as e:
-            print('Too many requests, retrying')
+            print('Too many requests, retrying in {}s'.format(sleep_time))
             print(e)
+            sleep(sleep_time)
             retries += 1
-    if not result and retries == 5:
+    if not result and retries == max_retries:
         raise Exception('too many retries for request {}{}'.format(function.__name__, args))
     return result
 
